@@ -3,23 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智能流程优化平台 - 创意设计比赛</title>
+    <title>智能流程优化平台</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e40af',
+                        secondary: '#3b82f6',
+                        accent: '#10b981',
+                        dark: '#1f2937'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
         
         body {
             font-family: 'Noto Sans SC', sans-serif;
             background-color: #f9fafb;
-            scroll-behavior: smooth;
         }
         
         .card {
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            background-color: rgba(255, 255, 255, 0.95);
         }
         
         .card:hover {
@@ -36,6 +48,69 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         
+        .flow-node {
+            position: absolute;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            min-width: 140px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .flow-node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .flow-connection {
+            position: absolute;
+            height: 2px;
+            background: #888;
+            transform-origin: 0 0;
+        }
+        
+        .flow-arrow {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-left: 10px solid #888;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+        }
+        
+        .timeline-item:after {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 21px;
+            width: 2px;
+            height: calc(100% + 10px);
+            background: #d1d5db;
+        }
+        
+        .timeline-item:last-child:after {
+            display: none;
+        }
+        
         .feature-icon {
             width: 60px;
             height: 60px;
@@ -44,68 +119,6 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 20px;
-        }
-        
-        .process-node {
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background-color: rgba(255, 255, 255, 0.95);
-        }
-        
-        .process-node:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-        
-        .active-tab {
-            background-color: #1e40af;
-            color: white;
-        }
-        
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .bottleneck-indicator {
-            height: 8px;
-            border-radius: 4px;
-            background: linear-gradient(to right, #10b981, #ef4444);
-        }
-        
-        .indicator-dot {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            position: absolute;
-            top: -4px;
-            transform: translateX(-50%);
-        }
-        
-        /* 提高透明度部分的可见性 */
-        .overview-card {
-            background-color: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-        
-        .demo-container {
-            background-color: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        
-        .demo-tab {
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 20px;
         }
     </style>
 </head>
@@ -124,22 +137,11 @@
                 <a href="#features" class="hover:text-blue-200">核心功能</a>
                 <a href="#workflow" class="hover:text-blue-200">流程设计</a>
                 <a href="#analysis" class="hover:text-blue-200">瓶颈分析</a>
-                <a href="#demo" class="hover:text-blue-200">功能演示</a>
+                <a href="#roadmap" class="hover:text-blue-200">实施路线</a>
             </div>
-            <button class="md:hidden text-white" id="mobileMenuBtn">
+            <button class="md:hidden text-white">
                 <i class="fas fa-bars text-2xl"></i>
             </button>
-        </div>
-        
-        <!-- 移动端菜单 -->
-        <div class="md:hidden hidden bg-primary-dark py-4" id="mobileMenu">
-            <div class="flex flex-col space-y-3 px-6">
-                <a href="#overview" class="hover:text-blue-200">平台概览</a>
-                <a href="#features" class="hover:text-blue-200">核心功能</a>
-                <a href="#workflow" class="hover:text-blue-200">流程设计</a>
-                <a href="#analysis" class="hover:text-blue-200">瓶颈分析</a>
-                <a href="#demo" class="hover:text-blue-200">功能演示</a>
-            </div>
         </div>
     </nav>
 
@@ -156,28 +158,28 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-                <div class="overview-card rounded-xl p-6 text-center card">
-                    <div class="feature-icon mx-auto">
-                        <i class="fas fa-chart-line text-primary text-2xl"></i>
+                <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6 text-center card">
+                    <div class="feature-icon bg-white bg-opacity-30 mx-auto">
+                        <i class="fas fa-chart-line text-white text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-dark mb-3">效率提升</h3>
-                    <p class="text-gray-600">自动化重复流程，减少人工操作时间</p>
+                    <h3 class="text-xl font-bold text-white mb-3">效率提升</h3>
+                    <p class="text-blue-100">自动化重复流程，减少人工操作时间</p>
                 </div>
                 
-                <div class="overview-card rounded-xl p-6 text-center card">
-                    <div class="feature-icon mx-auto">
-                        <i class="fas fa-eye text-primary text-2xl"></i>
+                <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6 text-center card">
+                    <div class="feature-icon bg-white bg-opacity-30 mx-auto">
+                        <i class="fas fa-eye text-white text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-dark mb-3">流程可视化</h3>
-                    <p class="text-gray-600">直观展示全流程节点，便于发现瓶颈</p>
+                    <h3 class="text-xl font-bold text-white mb-3">流程可视化</h3>
+                    <p class="text-blue-100">直观展示全流程节点，便于发现瓶颈</p>
                 </div>
                 
-                <div class="overview-card rounded-xl p-6 text-center card">
-                    <div class="feature-icon mx-auto">
-                        <i class="fas fa-brain text-primary text-2xl"></i>
+                <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6 text-center card">
+                    <div class="feature-icon bg-white bg-opacity-30 mx-auto">
+                        <i class="fas fa-brain text-white text-2xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-dark mb-3">智能优化</h3>
-                    <p class="text-gray-600">基于数据分析推荐流程改进方案</p>
+                    <h3 class="text-xl font-bold text-white mb-3">智能优化</h3>
+                    <p class="text-blue-100">基于数据分析推荐流程改进方案</p>
                 </div>
             </div>
         </div>
@@ -188,8 +190,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-3xl font-bold text-center text-dark mb-16">平台核心功能</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="card bg-gray-50 rounded-xl p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div class="card bg-gray-50 rounded-xl p-8">
                     <div class="flex items-start mb-6">
                         <div class="bg-primary text-white p-3 rounded-lg mr-4">
                             <i class="fas fa-project-diagram text-2xl"></i>
@@ -197,9 +199,6 @@
                         <div>
                             <h3 class="text-xl font-bold text-dark mb-2">流程建模与管理</h3>
                             <p class="text-gray-600">可视化流程设计工具，支持版本管理和权限控制</p>
-                            <button class="mt-3 bg-primary text-white py-2 px-4 rounded-lg btn" id="modelingDemoBtn">
-                                查看演示
-                            </button>
                         </div>
                     </div>
                     
@@ -210,9 +209,6 @@
                         <div>
                             <h3 class="text-xl font-bold text-dark mb-2">智能自动化</h3>
                             <p class="text-gray-600">自动化重复任务，规则引擎驱动，系统间数据同步</p>
-                            <button class="mt-3 bg-accent text-white py-2 px-4 rounded-lg btn" id="rpaBtn">
-                                了解RPA解决方案
-                            </button>
                         </div>
                     </div>
                     
@@ -223,14 +219,11 @@
                         <div>
                             <h3 class="text-xl font-bold text-dark mb-2">数据分析与监控</h3>
                             <p class="text-gray-600">实时性能仪表盘，异常预警系统，智能优化建议</p>
-                            <button class="mt-3 bg-secondary text-white py-2 px-4 rounded-lg btn" id="analysisDemoBtn">
-                                查看演示
-                            </button>
                         </div>
                     </div>
                 </div>
                 
-                <div class="card bg-gray-50 rounded-xl p-6">
+                <div class="card bg-gray-50 rounded-xl p-8">
                     <div class="flex items-start mb-6">
                         <div class="bg-purple-600 text-white p-3 rounded-lg mr-4">
                             <i class="fas fa-plug text-2xl"></i>
@@ -238,9 +231,6 @@
                         <div>
                             <h3 class="text-xl font-bold text-dark mb-2">系统集成</h3>
                             <p class="text-gray-600">无缝对接企业现有软件（ERP、OA、CRM等）</p>
-                            <button class="mt-3 bg-purple-600 text-white py-2 px-4 rounded-lg btn" id="integrationDemoBtn">
-                                查看演示
-                            </button>
                         </div>
                     </div>
                     
@@ -251,9 +241,6 @@
                         <div>
                             <h3 class="text-xl font-bold text-dark mb-2">多端支持</h3>
                             <p class="text-gray-600">Web端管理，移动端流程处理与消息提醒</p>
-                            <button class="mt-3 bg-yellow-500 text-white py-2 px-4 rounded-lg btn" id="mobileDemoBtn">
-                                查看演示
-                            </button>
                         </div>
                     </div>
                     
@@ -264,9 +251,6 @@
                         <div>
                             <h3 class="text-xl font-bold text-dark mb-2">行业适配</h3>
                             <p class="text-gray-600">支持制造业、服务业等多行业流程模板</p>
-                            <button class="mt-3 bg-pink-500 text-white py-2 px-4 rounded-lg btn" id="industryBtn">
-                                查看行业方案
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -286,20 +270,84 @@
                 <div class="flex justify-between mb-6">
                     <div>
                         <h3 class="text-xl font-bold text-dark">采购审批流程</h3>
-                        <p class="text-gray-500">版本 2.1 | 最后更新: 2023-07-15</p>
+                        <p class="text-gray-500">版本 2.1 | 最后更新: 2025-08-05</p>
                     </div>
                     <div>
-                        <button class="bg-primary text-white py-2 px-4 rounded-lg mr-2 btn" id="saveProcessBtn">
+                        <button class="bg-primary text-white py-2 px-4 rounded-lg mr-2 btn">
                             <i class="fas fa-save mr-2"></i>保存
                         </button>
-                        <button class="bg-gray-200 text-dark py-2 px-4 rounded-lg btn" id="runProcessBtn">
+                        <button class="bg-gray-200 text-dark py-2 px-4 rounded-lg btn">
                             <i class="fas fa-play mr-2"></i>模拟运行
                         </button>
                     </div>
                 </div>
                 
-                <div class="bg-gray-100 rounded-lg p-4 h-[500px] relative overflow-auto" id="processCanvas">
-                    <!-- 流程节点将通过JS动态生成 -->
+                <div class="bg-gray-100 rounded-lg p-4 h-[500px] relative overflow-auto">
+                    <!-- 流程节点 -->
+                    <div class="flow-node bg-green-100 border border-green-300" style="left: 50px; top: 200px;">
+                        <div class="flex items-center">
+                            <span class="mr-2 text-green-600"><i class="fas fa-play-circle"></i></span>
+                            <span>开始</span>
+                        </div>
+                    </div>
+                    <div class="flow-node bg-blue-100 border border-blue-300" style="left: 200px; top: 200px;">
+                        <div class="flex items-center">
+                            <span class="mr-2 text-blue-600"><i class="fas fa-file-alt"></i></span>
+                            <span>采购申请提交</span>
+                        </div>
+                    </div>
+                    <div class="flow-node bg-yellow-100 border border-yellow-300" style="left: 400px; top: 200px;">
+                        <div class="flex items-center">
+                            <span class="mr-2 text-yellow-600"><i class="fas fa-question-circle"></i></span>
+                            <span>金额≤10万?</span>
+                        </div>
+                    </div>
+                    <div class="flow-node bg-blue-100 border border-blue-300" style="left: 600px; top: 100px;">
+                        <div class="flex items-center">
+                            <span class="mr-2 text-blue-600"><i class="fas fa-user-tie"></i></span>
+                            <span>部门经理审批</span>
+                        </div>
+                    </div>
+                    <div class="flow-node bg-blue-100 border border-blue-300" style="left: 600px; top: 300px;">
+                        <div class="flex items-center">
+                            <span class="mr-2 text-blue-600"><i class="fas fa-user-cog"></i></span>
+                            <span>总经理审批</span>
+                        </div>
+                    </div>
+                    <div class="flow-node bg-blue-100 border border-blue-300" style="left: 800px; top: 200px;">
+                        <div class="flex items-center">
+                            <span class="mr-2 text-blue-600"><i class="fas fa-shopping-cart"></i></span>
+                            <span>执行采购</span>
+                        </div>
+                    </div>
+                    <div class="flow-node bg-red-100 border border-red-300" style="left: 1000px; top: 200px;">
+                        <div class="flex items-center">
+                            <span class="mr-2 text-red-600"><i class="fas fa-flag-checkered"></i></span>
+                            <span>结束</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 流程连接线 -->
+                    <div class="flow-connection" style="left: 120px; top: 220px; width: 80px; transform: rotate(0deg);"></div>
+                    <div class="flow-arrow" style="left: 200px; top: 218px;"></div>
+                    
+                    <div class="flow-connection" style="left: 280px; top: 220px; width: 120px; transform: rotate(0deg);"></div>
+                    <div class="flow-arrow" style="left: 400px; top: 218px;"></div>
+                    
+                    <div class="flow-connection" style="left: 440px; top: 220px; width: 160px; transform: rotate(-45deg);"></div>
+                    <div class="flow-arrow" style="left: 600px; top: 118px; transform: rotate(-45deg);"></div>
+                    
+                    <div class="flow-connection" style="left: 440px; top: 220px; width: 160px; transform: rotate(45deg);"></div>
+                    <div class="flow-arrow" style="left: 600px; top: 318px; transform: rotate(45deg);"></div>
+                    
+                    <div class="flow-connection" style="left: 640px; top: 120px; width: 160px; transform: rotate(0deg);"></div>
+                    <div class="flow-arrow" style="left: 800px; top: 118px;"></div>
+                    
+                    <div class="flow-connection" style="left: 640px; top: 320px; width: 160px; transform: rotate(0deg);"></div>
+                    <div class="flow-arrow" style="left: 800px; top: 318px;"></div>
+                    
+                    <div class="flow-connection" style="left: 840px; top: 220px; width: 160px; transform: rotate(0deg);"></div>
+                    <div class="flow-arrow" style="left: 1000px; top: 218px;"></div>
                 </div>
             </div>
             
@@ -307,7 +355,7 @@
                 <div class="card bg-white rounded-lg p-6">
                     <h3 class="font-bold text-lg mb-3">自动化功能</h3>
                     <p class="text-gray-600 mb-4">使用RPA技术自动化重复任务</p>
-                    <button class="bg-primary text-white py-2 px-4 rounded-lg btn w-full" id="rpaLinkBtn">
+                    <button class="bg-primary text-white py-2 px-4 rounded-lg btn w-full" onclick="window.open('https://rpa.pbottle.com/docs/', '_blank')">
                         了解RPA解决方案 <i class="fas fa-external-link-alt ml-2"></i>
                     </button>
                 </div>
@@ -315,7 +363,7 @@
                 <div class="card bg-white rounded-lg p-6">
                     <h3 class="font-bold text-lg mb-3">规则引擎</h3>
                     <p class="text-gray-600 mb-4">预设触发条件自动跳转节点</p>
-                    <button class="bg-secondary text-white py-2 px-4 rounded-lg btn w-full" id="ruleDemoBtn">
+                    <button class="bg-secondary text-white py-2 px-4 rounded-lg btn w-full" onclick="alert('规则引擎演示：金额>10万需总经理审批')">
                         查看规则示例
                     </button>
                 </div>
@@ -323,7 +371,7 @@
                 <div class="card bg-white rounded-lg p-6">
                     <h3 class="font-bold text-lg mb-3">流程模板</h3>
                     <p class="text-gray-600 mb-4">使用预设模板快速创建流程</p>
-                    <button class="bg-accent text-white py-2 px-4 rounded-lg btn w-full" id="templateBtn">
+                    <button class="bg-accent text-white py-2 px-4 rounded-lg btn w-full" onclick="alert('已加载采购审批流程模板')">
                         应用模板
                     </button>
                 </div>
@@ -334,7 +382,7 @@
     <!-- 瓶颈分析 -->
     <section id="analysis" class="py-16 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-center text-dark mb-6">流程瓶颈分析</h2>
+            <h2 class="text-极客时间
             <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">
                 基于历史数据分析流程性能，识别瓶颈并提供优化建议
             </p>
@@ -344,7 +392,7 @@
                     <h3 class="text-xl font-bold text-dark mb-4">流程耗时分析</h3>
                     <div class="h-80">
                         <canvas id="bottleneckChart"></canvas>
-                    </div>
+                    </极客时间
                 </div>
                 
                 <div class="card bg-gray-50 rounded-xl p-6">
@@ -357,9 +405,6 @@
                             <div>
                                 <h4 class="font-bold mb-1">自动化小额审批</h4>
                                 <p class="text-gray-600">金额≤5万的审批可自动化，预计节省30%处理时间</p>
-                                <button class="mt-2 text-primary text-sm font-medium" id="applySuggestion1">
-                                    应用此建议 <i class="fas fa-arrow-right ml-1"></i>
-                                </button>
                             </div>
                         </div>
                         
@@ -370,9 +415,6 @@
                             <div>
                                 <h4 class="font-bold mb-1">优化审批权限</h4>
                                 <p class="text-gray-600">将部分审批下放给总监，减少高层审批压力</p>
-                                <button class="mt-2 text-primary text-sm font-medium" id="applySuggestion2">
-                                    应用此建议 <i class="fas fa-arrow-right ml-1"></i>
-                                </button>
                             </div>
                         </div>
                         
@@ -383,50 +425,137 @@
                             <div>
                                 <h4 class="font-bold mb-1">自动提醒功能</h4>
                                 <p class="text-gray-600">实现自动提醒功能，减少确认等待时间</p>
-                                <button class="mt-2 text-primary text-sm font-medium" id="applySuggestion3">
-                                    应用此建议 <i class="fas fa-arrow-right ml-1"></i>
-                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="mt-12">
-                <h3 class="text-xl font-bold text-dark mb-6">瓶颈严重程度</h3>
-                <div class="bg-white rounded-xl p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+                <div class="card bg-white rounded-lg p-6">
+                    <h3 class="font-bold text-lg mb-3">实时监控</h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <div class="text-3xl font-bold text-primary">92%</div>
+                            <div class="text-gray-600">流程完成率</div>
+                        </div>
+                        <div class="w-24 h-24">
+                            <canvas id="completionChart"></canvas>
+                        </div>
+                    </div>
+                    <button class="bg-gray-100 text-dark py-2 px-4 rounded-lg btn w-full">
+                        查看详情
+                    </button>
+                </div>
+                
+                <div class="card bg-white rounded-lg p-6">
+                    <h3 class="font-bold text-lg mb-3">异常预警</h3>
                     <div class="mb-4">
                         <div class="flex justify-between mb-2">
-                            <span class="text-gray-600">部门经理审批</span>
-                            <span class="font-bold text-red-600">严重</span>
+                            <span class="text-gray-600">超时流程</span>
+                            <span class="font-bold text-red-600">3</span>
                         </div>
-                        <div class="relative mb-6">
-                            <div class="bottleneck-indicator w-full">
-                                <div class="indicator-dot bg-red-600" style="left: 85%;"></div>
-                            </div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-600">异常数据</span>
+                            <span class="font-bold text-yellow-600">2</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">阻塞节点</span>
+                            <span class="font-bold text-primary">1</span>
+                        </div>
+                    </div>
+                    <button class="bg-gray-100 text-dark py-2 px-4 rounded-lg btn w-full">
+                        处理异常
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 技术架构 -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center text-dark mb-16">技术架构方案</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div>
+                    <div class="bg-white rounded-xl p-6 mb-6 card">
+                        <h3 class="text-xl font-bold text-dark mb-4">前端技术</h3>
+                        <div class="flex flex-wrap gap-3">
+                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">React/Next.js</span>
+                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">Tailwind CSS</span>
+                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">可视化拖拽框架</span>
                         </div>
                     </div>
                     
-                    <div class="mb-4">
-                        <div class="flex justify-between mb-2">
-                            <span class="text-gray-600">总经理审批</span>
-                            <span class="font-bold text-orange-500">中等</span>
-                        </div>
-                        <div class="relative mb-6">
-                            <div class="bottleneck-indicator w-full">
-                                <div class="indicator-dot bg-orange-500" style="left: 60%;"></div>
-                            </div>
+                    <div class="bg-white rounded-xl p-6 mb-6 card">
+                        <h3 class="text-xl font-bold text-dark mb-4">后端技术</h3>
+                        <div class="flex flex-wrap gap-3">
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full">Node.js/Java</span>
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full">Spring Boot</span>
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full">流程引擎</span>
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full">规则引擎</极客时间
                         </div>
                     </div>
                     
-                    <div>
-                        <div class="flex justify-between mb-2">
-                            <span class="text-gray-600">客户确认</span>
-                            <span class="font-bold text-green-600">轻微</span>
+                    <div class="bg-white rounded-xl p-6 card">
+                        <h3 class="text-xl font-bold text-dark mb-4">数据与AI</h3>
+                        <div class="flex flex-wrap gap-3">
+                            <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full">MySQL</span>
+                            <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full">MongoDB</span>
+                            <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full">Python数据分析</span>
+                            <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full">RPA技术</span>
                         </div>
-                        <div class="relative">
-                            <div class="bottleneck-indicator w-full">
-                                <div class="indicator-dot bg-green-600" style="left: 30%;"></div>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="bg-white rounded-xl p-8 h-full flex items-center justify-center card">
+                        <div class="text-center">
+                            <h3 class="text-xl font-bold text-dark mb-6">云架构示意图</h3>
+                            <div class="flex flex-col items-center">
+                                <div class="flex space-x-8 mb-8">
+                                    <div class="bg-blue-100 p-4 rounded-lg shadow">
+                                        <i class="fas fa-desktop text-blue-600 text-2xl"></i>
+                                        <div class="mt-2">Web端</div>
+                                    </div>
+                                    <div class="bg-blue-100 p-4 rounded-lg shadow">
+                                        <i class="fas fa-mobile-alt text-blue-600 text-2xl"></i>
+                                        <div class="mt-2">移动端</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-8">
+                                    <i class="fas fa-arrow-down text-gray-400 text-2xl"></i>
+                                </div>
+                                
+                                <div class="bg-blue-500 text-white p-6 rounded-lg mb-8 w-64">
+                                    <i class="fas fa-cloud text-2xl mb-2"></i>
+                                    <div>智能流程优化云平台</div>
+                                </div>
+                                
+                                <div class="mb-8">
+                                    <i class="fas fa-arrow-down text-gray-400 text-2xl"></i>
+                                </div>
+                                
+                                <div class="flex space-x-4">
+                                    <div class="bg-gray-100 p-3 rounded-lg shadow">
+                                        <i class="fas fa-calculator text-gray-600"></i>
+                                        <div class="text-sm mt-1">ERP</div>
+                                    </div>
+                                    <div class="bg-gray-100 p-3 rounded-lg shadow">
+                                        <i class="fas fa-address-book text-gray-600"></i>
+                                        <div class="text-sm mt-1">CRM</div>
+                                    </div>
+                                    <div class="bg-gray-100 p-3 rounded-lg shadow">
+                                        <i class="fas fa-file-alt text-gray-600"></i>
+                                        <div class="text-sm mt极客时间
+                                    </div>
+                                    <div class="bg-gray-100 p-3 rounded-lg shadow">
+                                        <i class="fas fa-warehouse text-gray-600"></i>
+                                        <div class="text-sm mt-1">SCM</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -435,147 +564,163 @@
         </div>
     </section>
 
-    <!-- 功能演示 -->
-    <section id="demo" class="py-16 bg-gray-50">
+    <!-- 实施路线图 -->
+    <section id="roadmap" class="py-16 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-center text-dark mb-16">功能演示</h2>
+            <h2 class="text-3xl font-bold text-center text-dark mb-6">开发实施路线</h2>
+            <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">
+                清晰的实施阶段划分，确保项目顺利推进
+            </p>
             
-            <div class="bg-white rounded-xl shadow-md overflow-hidden">
-                <div class="flex border-b">
-                    <button class="py-4 px-6 font-medium text-gray-600 hover:text-primary tab-btn active-tab" data-tab="demo1">流程建模</button>
-                    <button class="py-4 px-6 font-medium text-gray-600 hover:text-primary tab-btn" data-tab="demo2">自动化执行</button>
-                    <button class="py-4 px-6 font-medium text-gray-600 hover:text-primary tab-btn" data-tab="demo3">数据分析</button>
-                    <button class="py-4 px-6 font-medium text-gray-600 hover:text-primary tab-btn" data-tab="demo4">系统集成</button>
+            <div class="relative">
+                <div class="flex justify-between mb-10">
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-xl font-bold">1</div>
+                        <div class="mt-4 text-center">
+                            <strong>需求调研</strong>
+                            <p class="text-sm text-gray-500">1-2个月</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-xl font-bold">2</div>
+                        <div class="mt-4 text-center">
+                            <strong>原型开发</strong>
+                            <p class="text-sm text极客时间
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-xl font-bold">3</div>
+                        <div class="mt-4 text-center">
+                            <strong>测试迭代</strong>
+                            <p class="text-sm text-gray-500">2个月</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-xl font-bold">4</div>
+                        <div class="mt-4 text-center">
+                            <strong>上线推广</strong>
+                            <p class="text-sm text-gray-500">持续</p>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="p-6">
-                    <div id="demo1" class="tab-content active">
-                        <div class="flex flex-col md:flex-row gap-8">
-                            <div class="md:w-1/2">
-                                <h3 class="text-xl font-bold text-dark mb-4">可视化流程建模</h3>
-                                <p class="text-gray-600 mb-6">
-                                    通过拖拽式界面快速构建业务流程，支持多种节点类型和条件判断。
-                                    实时预览流程效果，一键保存和分享。
-                                </p>
-                                <ul class="space-y-3 mb-6">
-                                    <li class="flex items-start">
-                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                        <span>拖拽式节点设计</span>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                        <span>实时流程预览</span>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
-                                        <span>版本控制与管理</span>
-                                    </li>
-                                </ul>
-                                <button class="bg-primary text-white py-2 px-6 rounded-lg btn">
-                                    开始建模 <i class="fas fa-arrow-right ml-2"></i>
-                                </button>
-                            </div>
-                            <div class="md:w-1/2 flex items-center justify-center">
-                                <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-64 flex items-center justify-center">
-                                    <i class="fas fa-project-diagram text-4xl text-gray-400"></i>
-                                </div>
-                            </div>
-                        </div>
+                <div class="space-y-6">
+                    <div class="card bg-gray-50 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-dark mb-3">需求调研阶段</h3>
+                        <ul class="list-disc pl-5 space-y-2 text-gray-600">
+                            <li>不同行业企业访谈</li>
+                            <li>核心流程痛点分析</li>
+                            <li>需求文档输出</li>
+                        </ul>
                     </div>
                     
-                    <div id="demo2" class="tab-content">
-                        <div class="flex flex-col md:flex-row gap-8">
-                            <div class="md:w-1/2">
-                                <h3 class="text-xl font-bold text-dark mb-4">自动化任务执行</h3>
-                                <p class="text-gray-600 mb-6">
-                                    使用RPA技术自动化重复性任务，如数据录入、报表生成等。
-                                    通过规则引擎实现智能决策和流程跳转。
-                                </p>
-                                <div class="mb-6">
-                                    <div class="flex items-center mb-3">
-                                        <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3">
-                                            1
-                                        </div>
-                                        <span>配置自动化任务</span>
-                                    </div>
-                                    <div class="flex items-center mb-3">
-                                        <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3">
-                                            2
-                                        </div>
-                                        <span>设置触发规则</span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3">
-                                            3
-                                        </div>
-                                        <span>监控执行结果</span>
-                                    </div>
-                                </div>
-                                <button class="bg-accent text-white py-2 px-6 rounded-lg btn" id="rpaDemoBtn">
-                                    了解RPA解决方案 <i class="fas fa-external-link-alt ml-2"></i>
-                                </button>
-                            </div>
-                            <div class="md:w-1/2 flex items-center justify-center">
-                                <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-64 flex items-center justify-center">
-                                    <i class="fas fa-robot text-4xl text-gray-400"></i>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="card bg-gray-50 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-dark mb-3">原型开发阶段</h3>
+                        <ul class="list-disc pl-5 space-y-2 text-gray-600">
+                            <li>UI/UX设计定稿</li>
+                            <li>核心功能开发</li>
+                            <li>流程引擎实现</li>
+                        </ul>
                     </div>
                     
-                    <div id="demo3" class="tab-content">
-                        <div class="flex flex-col md:flex-row gap-8">
-                            <div class="md:w-1/2">
-                                <h3 class="text-xl font-bold text-dark mb-4">数据驱动分析</h3>
-                                <p class="text-gray-600 mb-6">
-                                    实时监控流程性能指标，识别瓶颈环节。
-                                    基于历史数据提供智能优化建议，持续改进流程效率。
-                                </p>
-                                <div class="mb-6">
-                                    <div class="flex justify-between mb-1">
-                                        <span class="text-gray-600">流程完成率</span>
-                                        <span class="font-bold">92%</span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                        <div class="bg-green-600 h-2.5 rounded-full" style="width: 92%"></div>
-                                    </div>
-                                </div>
-                                <button class="bg-secondary text-white py-2 px-6 rounded-lg btn">
-                                    查看分析报告 <i class="fas fa-chart-bar ml-2"></i>
-                                </button>
-                            </div>
-                            <div class="md:w-1/2 flex items-center justify-center">
-                                <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-64 flex items-center justify-center">
-                                    <i class="fas fa-chart-line text-4xl text-gray-400"></i>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="card bg-gray-50 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-dark mb-3">测试迭代阶段</h3>
+                        <ul class="list-disc pl-5 space-y-2 text-gray-600">
+                            <li>内部功能测试</li>
+                            <li>试点企业验证</li>
+                            <li>优化方案实施</li>
+                        </ul>
                     </div>
                     
-                    <div id="demo4" class="tab-content">
-                        <div class="flex flex-col md:flex-row gap-8">
-                            <div class="md:w-1/2">
-                                <h3 class="text-xl font-bold text-dark mb-4">企业系统集成</h3>
-                                <p class="text-gray-600 mb-6">
-                                    无缝对接企业现有系统，如ERP、CRM、OA等。
-                                    实现数据互通，避免信息孤岛。
-                                </p>
-                                <div class="flex flex-wrap gap-3 mb-6">
-                                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">ERP系统</span>
-                                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">CRM系统</span>
-                                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">OA系统</span>
-                                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">SCM系统</span>
-                                </div>
-                                <button class="bg-purple-600 text-white py-2 px-6 rounded-lg btn">
-                                    配置集成 <i class="fas fa-cog ml-2"></i>
-                                </button>
-                            </div>
-                            <div class="md:w-1/2 flex items-center justify-center">
-                                <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-64 flex items-center justify-center">
-                                    <i class="fas fa-plug text-4xl text-gray-400"></i>
-                                </div>
-                            </div>
+                    <div class="card bg-gray-50 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-dark mb-3">上线推广阶段</h3>
+                        <ul class="list-disc pl-5 space-y-2 text-gray-600">
+                            <li>分行业版本发布</li>
+                            <li>企业培训实施</li>
+                            <li>持续运维支持</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 预期效果 -->
+    <section class="py-16 bg-gradient-to-br from-primary to-blue-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-center text-white mb-16">预期效果与落地路径</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+                <div class="card bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-white mb-4">短期效果</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="bg-white text-primary rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-1">✓</span>
+                            <span class="text-blue-100">流程效率提升</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="bg-white text-primary rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-1">✓</span>
+                            <span class="text-blue-100">人工操作减少</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="bg-white text-primary rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-1">✓</span>
+                            <span class="text-blue-100">流程可视化覆盖率提升</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="card bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-white mb-4">长期效果</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="bg-white text-primary rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-1">✓</span>
+                            <span class="text-blue-100">多行业适配</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="bg-white text-primary rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-1">✓</span>
+                            <span class="text-blue-100">部署时间缩短</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="bg-white text-primary rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-1">✓</span>
+                            <span class="text-blue-100">持续优化能力</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl p-6">
+                <h3 class="text-xl font-bold text-white mb-6">落地路径</h3>
+                <div class="flex justify-between items-center">
+                    <div class="text-center">
+                        <div class="bg-white text-primary rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-3 text-2xl font-bold shadow-lg">
+                            1
                         </div>
+                        <h4 class="font-bold text-white">单一流程</h4>
+                        <p class="text-blue-100 text-sm">从单一流程切入</p>
+                    </div>
+                    
+                    <div class="text-blue-100 text-2xl">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="bg-white text-primary rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-3 text-2xl font-bold shadow-lg">
+                            2
+                        </div>
+                        <h4 class="font-bold text-white">部门流程</h4>
+                        <p class="text-blue-100 text-sm">扩展至全部门流程</p>
+                    </div>
+                    
+                    <div class="text-blue-100 text-2xl">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="bg-white text-primary rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-3 text-2xl font-bold shadow-lg">
+                            3
+                        </div>
+                        <h4 class="font-bold text-white">跨企业</h4>
+                        <p class="text-blue-100 text-sm">实现跨企业方案复制</p>
                     </div>
                 </div>
             </div>
@@ -593,12 +738,15 @@
                 </p>
             </div>
             <div>
-                <h3 class="text-lg font-semib极客时间
                 <h3 class="text-lg font-semibold mb-4">产品功能</h3>
                 <ul class="space-y-2 text-gray-300">
                     <li>流程建模与管理</li>
                     <li>智能自动化</li>
-                    <极客时间
+                    <li>数据分析与监控</li>
+                    <li>系统集成</li>
+                </ul>
+            </div>
+            <div>
                 <h3 class="text-lg font-semibold mb-4">行业解决方案</h3>
                 <ul class="space-y-2 text-gray-300">
                     <li>制造业</li>
@@ -618,29 +766,9 @@
             </div>
         </div>
         <div class="max-w-7xl mx-auto border-t border-gray-700 mt-10 pt-6 text-center text-gray-400">
-            <p>© 2023 智能流程优化平台 - 创意设计比赛作品</p>
+            <p>© 2025 智能流程优化平台 - 创意设计比赛作品</p>
         </div>
     </footer>
-
-    <!-- 模态框 -->
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" id="modal">
-        <div class="bg-white rounded-xl w-full max-w-md p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold" id="modalTitle">功能演示</h3>
-                <button class="text-gray-500 hover:text-gray-700" id="closeModal">
-                    <i class="fas fa-times"></极客时间
-                </button>
-            </div>
-            <div class="mb-6" id="modalContent">
-                <!-- 内容将通过JS动态填充 -->
-            </div>
-            <div class="flex justify-end">
-                <button class="bg-primary text-white py-2 px-6 rounded-lg btn" id="modalActionBtn">
-                    确定
-                </button>
-            </div>
-        </div>
-    </div>
 
     <script>
         // 初始化图表
@@ -686,41 +814,33 @@
                 }
             });
             
-            // 创建流程节点
-            const processCanvas = document.getElementById('processCanvas');
-            const nodes = [
-                {id: 'start', type: 'start', text: '开始', x: 50, y: 200, color: 'bg-green-100', border: 'border-green-300'},
-                {id: 'apply', type: 'task', text: '采购申请提交', x: 200, y: 200, color: 'bg-blue-100', border: 'border-blue-300'},
-                {id: 'decision', type: 'decision', text: '金额≤10万?', x: 400, y: 200, color: 'bg-yellow-100', border: 'border-yellow-300'},
-                {id: 'manager', type: 'task', text: '部门经理审批', x: 600, y: 100, color: '极客时间
-                {id: 'director', type: 'task', text: '总经理审批', x: 600, y: 300, color: 'bg-blue-100', border: 'border-blue-300'},
-                {id: 'execute', type: 'task', text: '执行采购', x: 800, y: 200, color: 'bg-blue-100', border: 'border-blue-300'},
-                {id: 'end', type: 'end', text: '结束', x: 1000, y: 200, color: 'bg-red-100', border: 'border-red-300'}
-            ];
-            
-            // 渲染流程节点
-            nodes.forEach(node => {
-                const nodeEl = document.createElement('div');
-                nodeEl.className = `absolute process-node ${node.color} border ${node.border} rounded-lg p-3 text-center min-w-[120px]`;
-                nodeEl.style.left = `${node.x}px`;
-                nodeEl.style.top = `${node.y}px`;
-                nodeEl.innerHTML = `
-                    <div class="flex items-center justify-center">
-                        <span class="mr-2">${getNodeIcon(node.type)}</span>
-                        <span>${node.text}</span>
-                    </div>
-                `;
-                nodeEl.dataset.id = node.id;
-                processCanvas.appendChild(nodeEl);
-            });
-            
-            // 添加节点点击事件
-            document.querySelectorAll('.process-node').forEach(node => {
-                node.addEventListener('click', function() {
-                    const nodeId = this.dataset.id;
-                    const nodeData = nodes.find(n => n.id === nodeId);
-                    showNodeDetails(nodeData);
-                });
+            // 完成率图表
+            const completionCtx = document.getElementById('completionChart').getContext('2d');
+            const completionChart = new Chart(completionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['完成', '未完成'],
+                    datasets: [{
+                        data: [92, 8],
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 99, 132, 0.8)'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    }
+                }
             });
             
             // 添加按钮点击反馈
@@ -748,190 +868,7 @@
                     }
                 });
             });
-            
-            // 移动端菜单切换
-            document.getElementById('mobileMenuBtn').addEventListener('click', function() {
-                const menu = document.getElementById('mobileMenu');
-                menu.classList.toggle('hidden');
-            });
-            
-            // 标签切换功能
-            document.querySelectorAll('.tab-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    // 移除所有active类
-                    document.querySelectorAll('.tab-btn').forEach(btn => {
-                        btn.classList.remove('active-tab');
-                    });
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.remove('active');
-                    });
-                    
-                    // 添加active类
-                    this.classList.add('active-tab');
-                    const tabId = this.dataset.tab;
-                    document.getElementById(tabId).classList.add('active');
-                });
-            });
-            
-            // 绑定功能按钮事件
-            document.getElementById('rpaBtn').addEventListener('click', openRPAWebsite);
-            document.getElementById('rpaLinkBtn').addEventListener('click', openRPAWebsite);
-            document.getElementById('rpaDemoBtn').addEventListener('click', openRPAWebsite);
-            document.getElementById('ruleDemoBtn').addEventListener('click', showRuleDemo);
-            document.getElementById('templateBtn').addEventListener('click', applyTemplate);
-            document.getElementById('saveProcessBtn').addEventListener('click', saveProcess);
-            document.getElementById('runProcessBtn').addEventListener('click', runProcess);
-            document.getElementById('closeModal').addEventListener('click', closeModal);
-            document.getElementById('modalActionBtn').addEventListener('click', closeModal);
-            
-            // 应用建议按钮
-            document.getElementById('applySuggestion1').addEventListener('click', function() {
-                showModal('自动化小额审批', '已应用自动化小额审批建议，预计可节省30%处理时间。');
-            });
-            document.getElementById('applySuggestion2').addEventListener('click', function() {
-                showModal('优化审批权限', '已应用优化审批权限建议，将部分审批下放给总监。');
-            });
-            document.getElementById('applySuggestion3').addEventListener('click', function() {
-                showModal('自动提醒功能', '已应用自动提醒功能建议，将减少确认等待时间。');
-            });
         });
-        
-        // 获取节点图标
-        function getNodeIcon(type) {
-            switch(type) {
-                case 'start': return '🔘';
-                case 'end': return '✅';
-                case 'decision': return '❓';
-                default: return '📋';
-            }
-        }
-        
-        // 显示节点详情
-        function showNodeDetails(node) {
-            let content = '';
-            if (node.type === 'decision') {
-                content = `
-                    <p class="mb-4">决策节点：${node.text}</p>
-                    <div class="mb-4">
-                        <label class="block text-gray-700 mb-2">决策条件：</label>
-                        <select class="w-full p-2 border rounded">
-                            <option>金额 ≤ 10万</option>
-                            <option>金额 > 10万</option>
-                        </select>
-                    </div>
-                    <div class="flex space-x-3">
-                        <button class="flex-1 bg-gray-200 text-dark py-2 rounded">取消</button>
-                        <button class="flex-1 bg-primary text-white py-2 rounded">保存</button>
-                    </div>
-                `;
-            } else {
-                content = `
-                    <p class="mb-4">节点类型：${getNodeTypeName(node.type)}</p>
-                    <div class="mb-4">
-                        <label class="block text-gray-700 mb-2">节点名称：</label>
-                        <input type="text" value="${node.text}" class="w-full p-2 border rounded">
-                    </div>
-                    <div class="flex space-x-3">
-                        <button class="flex-1 bg-gray-200 text-dark py-2 rounded">取消</button>
-                        <button class="flex-1 bg-primary text-white py-2 rounded">保存</button>
-                    </极客时间
-                `;
-            }
-            
-            showModal('节点配置', content);
-        }
-        
-        // 获取节点类型名称
-        function getNodeTypeName(type) {
-            switch(type) {
-                case 'start': return '开始节点';
-                case 'end': return '结束节点';
-                case 'decision': return '决策节点';
-                default: return '任务节点';
-            }
-        }
-        
-        // 打开RPA网站
-        function openRPAWebsite() {
-            window.open('https://rpa.pbottle.com/docs/', '_blank');
-        }
-        
-        // 显示规则示例
-        function showRuleDemo() {
-            const content = `
-                <p class="mb-4">规则引擎示例：审批流程自动路由</p>
-                <div class="bg-gray-100 p-4 rounded mb-4">
-                    <pre class="text-sm">
-IF 采购金额 ≤ 5万 THEN
-    自动审批通过
-ELSE IF 采购金额 ≤ 10万 THEN
-    路由至部门经理审批
-ELSE
-    路由至总经理审批
-END IF
-                    </pre>
-                </div>
-                <p class="text-sm text-gray-600">此规则可根据采购金额自动路由审批流程，减少人工决策时间。</p>
-            `;
-            showModal('规则引擎示例', content);
-        }
-        
-        // 应用模板
-        function applyTemplate() {
-            showModal('应用模板', '已应用标准采购审批流程模板。');
-        }
-        
-        // 保存流程
-        function saveProcess() {
-            showModal('保存流程', '采购审批流程已成功保存。');
-        }
-        
-        // 运行流程
-        function runProcess() {
-            const content = `
-                <p class="mb-4">模拟运行采购审批流程：</p>
-                <div class="mb-4">
-                    <div class="flex items-center mb-2">
-                        <div class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center mr-3">
-                            <i class="fas fa-check text-xs"></i>
-                        </div>
-                        <span>开始流程</span>
-                    </div>
-                    <div class="flex items-center mb-2">
-                        <div class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center mr-3">
-                            <i class="fas fa-check text-xs"></i>
-                        </div>
-                        <span>提交采购申请</span>
-                    </div>
-                    <div class="flex items-center mb-2">
-                        <div class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center mr-3">
-                            <i class="fas fa-check text-xs"></i>
-                        </div>
-                        <span>金额判断（>10万）</span>
-                    </div>
-                    <div class="flex items-center mb-2">
-                        <div class="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3">
-                            <i class="fas fa-sync-alt text-xs animate-spin"></i>
-                        </div>
-                        <span>等待总经理审批</span>
-                    </div>
-                </div>
-                <p class="text-sm text-gray-600">流程正在运行中，当前等待总经理审批...</p>
-            `;
-            showModal('流程模拟运行', content);
-        }
-        
-        // 显示模态框
-        function showModal(title, content) {
-            document.getElementById('modalTitle').textContent = title;
-            document.getElementById('modalContent').innerHTML = content;
-            document.getElementById('modal').classList.remove('hidden');
-        }
-        
-        // 关闭模态框
-        function closeModal() {
-            document.getElementById('modal').classList.add('hidden');
-        }
     </script>
 </body>
 </html>
